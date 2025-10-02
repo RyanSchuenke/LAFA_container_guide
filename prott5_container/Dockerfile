@@ -20,9 +20,9 @@ ENV HF_HUB_DOWNLOAD_TIMEOUT=300
 RUN mkdir -p /app/.cache/huggingface
 
 # Install Python dependencies
-COPY requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt
-
+COPY requirements2.txt .
+RUN pip3 install --no-cache-dir -r requirements2.txt
+RUN pip3 install --no-cache-dir cuml-cu11 --extra-index-url=https://pypi.nvidia.com
 # Pre-download the ProtT5 model during build
 RUN python3 -c "from transformers import T5EncoderModel, T5Tokenizer; \
     T5Tokenizer.from_pretrained('Rostlab/prot_t5_xl_half_uniref50-enc'); \
@@ -34,8 +34,8 @@ COPY prott5_main.py .
 COPY prott5_chunks.py .
 COPY run_prott5.sh .
 COPY prott5_embedder.py .
-COPY process_embeddings_gpu.py .
-COPY normalize_embeddings.py .
+COPY process_embeddings_gpu_optimized.py .
+# COPY normalize_embeddings.py .
 COPY retrieve_terms.py .
 COPY ontology.py .
 COPY config.yaml .

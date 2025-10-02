@@ -79,7 +79,7 @@ def process_query_chunk(task_data):
 
 
 def prott5_predict(annot_file, query_file, indices, graph, add_graph,
-                 prott5_results, output_baseline,  config_path=None, keep_self_hits=False):
+                 prott5_results, output_baseline,  config_path=None, keep_self_hits=False, num_threads=4):
     """Make predictions for query sequences based on prott5 hits."""
     
     if '.gaf' in annot_file or '.dat' in annot_file:
@@ -106,6 +106,12 @@ def prott5_predict(annot_file, query_file, indices, graph, add_graph,
         )
         annotation_mat, proteins, terms, _ = sparse_matrix_and_indices(terms_df)
         os.remove(f'{os.path.dirname(output_baseline)}/prott5_terms.tsv')
+    elif '.tsv' in annot_file:
+        terms_df = pd.read_csv(annot_file, sep='\t', header=0)
+        if terms_df.shape[1] != 3:
+            print("Invalid TSV format. Expected 3 columns: EntryID, term, aspect.")
+            sys.exit(1)
+        annotation_mat, proteins, terms, _ = sparse_matrix_and_indices(terms_df)
     elif annot_file.endswith('.npz'):
         if not indices:
             print("Please provide a term indices file for matrix input")
@@ -154,12 +160,11 @@ def prott5_predict(annot_file, query_file, indices, graph, add_graph,
     print(f"Processing {len(effective_queries)} query sequences with prott5 hits")
     
     # Pre-group the prott5 results by query ID
-    print("Grouping prott5 results by query ID...")
+    # print("Grouping prott5 results by query ID...")
     prott5_groups = dict(tuple(prott5_df.groupby('qseqid_acc')))
     
     # Determine number of processes
-    num_processes = min(int(os.environ.get('NUM_THREADS', multiprocessing.cpu_count())), 16)
-    num_processes = max(1, num_processes)
+    num_processes = num_threads
     print(f"Using {num_processes} processes for parallel computation")
     
     # Create temporary directory for output chunks
@@ -196,8 +201,8 @@ def prott5_predict(annot_file, query_file, indices, graph, add_graph,
             os.makedirs(output_dir)
             
         # Merge temporary files into final gzipped output
-        print(f"Merging results into final output file: {output_baseline}")
-        with gzip.open(output_baseline, 'wt', newline='') as outfile:
+        open_func = gzip.open if output_baseline.endswith('.gz') else open
+        with open_func(output_baseline, 'wt', newline='') as outfile:
             for temp_file in temp_files:
                 with open(temp_file, 'r') as infile:
                     outfile.write(infile.read())
@@ -236,6 +241,8 @@ def parse_args(argv):
                         help='Path to the output file', required=True)
     parser.add_argument('--keep_self_hits', action='store_true',
                         help='Keep self-hits in prott5 results')
+    parser.add_argument('--num_threads', type=int, default=4,
+                        help='Number of threads to use (default: 4)')
     return parser.parse_args(argv)
 
 
@@ -251,6 +258,7 @@ def main():
         output_baseline=args.output_baseline,
         config_path=os.path.join(os.path.dirname(__file__), 'config.yaml'),
         keep_self_hits=args.keep_self_hits,
+        num_threads=args.num_threads
     )
 
 

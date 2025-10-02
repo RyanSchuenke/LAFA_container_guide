@@ -87,17 +87,18 @@ DBSET_EMBEDDINGS="$TEMP_DIR/dbset_embeddings.h5"
 export HF_HOME="$MODEL_DIR"
 export NUM_THREADS="$NUM_THREADS"
 
-echo "Step 1: Generating ProtT5 embeddings for query set..."
+echo "Step 1.1: Generating ProtT5 embeddings for query set..."
 python3 prott5_embedder.py --input "$QUERY_FILE" --output "$EVALSET_EMBEDDINGS" --per_protein 1 --model "$MODEL_DIR"
 
-echo "Step 2: Generating ProtT5 embeddings for database set..."
+echo "Step 1.2: Generating ProtT5 embeddings for database set..."
 python3 prott5_embedder.py --input "$DATABASE_FILE" --output "$DBSET_EMBEDDINGS" --per_protein 1 --model "$MODEL_DIR"
 
-echo "Step 3: Computing similarity matrix and processing embeddings..."
-python3 process_embeddings_gpu.py "$EVALSET_EMBEDDINGS" "$DBSET_EMBEDDINGS" "$OUTPUT_FILE"
+echo "Step 1.3: Computing similarity matrix and processing embeddings..."
+# python3 process_embeddings_gpu.py "$EVALSET_EMBEDDINGS" "$DBSET_EMBEDDINGS" "$OUTPUT_FILE"
+python3 process_embeddings_gpu_optimized.py "$EVALSET_EMBEDDINGS" "$DBSET_EMBEDDINGS" "$OUTPUT_FILE" "normalize"
 
-echo "Step 4: Normalizing similarity scores..."
-python3 normalize_embeddings.py "$OUTPUT_FILE"
+#echo "Step 4: Normalizing similarity scores..."
+#python3 normalize_embeddings.py "$OUTPUT_FILE"
 
 # # Generate normalized output filename
 OUTPUT_NORM=${OUTPUT_FILE/.tsv/_norm.tsv}
@@ -109,16 +110,13 @@ OUTPUT_NORM=${OUTPUT_FILE/.tsv/_norm.tsv}
 # sed -ri 's/\|[^\t]*\t/\t/g' "$OUTPUT_NORM"
 
 # Clean up intermediate files
-echo "Cleaning up temporary files..."
-rm -rf "$TEMP_DIR"
+# echo "Cleaning up temporary files..."
+# rm -rf "$TEMP_DIR"
 
 # Verify output files were created
 if [[ -f "$OUTPUT_FILE" ]]; then
     RESULT_COUNT=$(wc -l < "$OUTPUT_FILE")
-    echo "ProtT5 analysis completed successfully!"
-    echo "Raw results written to: $OUTPUT_FILE"
-    echo "Normalized results written to: $OUTPUT_NORM"
-    echo "Number of similarity results: $RESULT_COUNT"
+    echo "Step 1 completed. Raw results written to: $OUTPUT_FILE. Normalized results written to: $OUTPUT_NORM"
 else
     echo "Error: Output file was not created"
     exit 1
