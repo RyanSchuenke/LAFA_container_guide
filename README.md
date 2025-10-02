@@ -169,7 +169,7 @@ docker run --rm \
     prott5_predictor \
     --query_file /app/data/test_sequences.fasta \
     --train_sequences /app/data/train_sequences.fasta \
-    --annot_file /app/data/annotations.gaf.gz \
+    --annot_file /app/data/train_terms.tsv \
     --graph /app/data/go-basic.obo \
     --output_baseline /app/output/prott5_predictions.tsv.gz
 ```
@@ -205,37 +205,30 @@ You can use the files in `test_data` folder to test your containerized method. W
 
 ```bash
 # Test with sample data (basic run without data mounting)
-docker run --rm your-method-container \
-    --query_file query_sequences.fasta \
-    --train_sequences db_sequences.fasta \
-    --annot_file goa_uniprot_filtered.gaf.gz \
+docker run --rm \
+    your-method-container \
+    --query_file test_sequences.fasta \
+    --train_sequences train_sequences.fasta \
+    --annot_file train_terms.tsv \
     --graph go-basic.obo \
     --output_file test_predictions.tsv
+```
+You can also specify memory usage and CPU/GPU option (if applicable to your method). The following example is recommended if you have 16GB RAM. However, since ProtT5 embeddings are expensive to generate, limitting to 16GB RAM might cause some proteins to not be processed.
 
-# Test with data mounting (recommended)
+```bash
+# Test with data mounting and memory/CPU/GPU usage (recommended)
 docker run --rm \
+    --memory=8g --memory-swap=12g \
+    --cpus=4 --gpus all \ 
     -v /path/to/test_data:/app/data:ro \
     -v /path/to/test_output:/app/output:rw \
     your-method-container \
-    --query_file /app/data/query_sequences.fasta \
-    --train_sequences /app/data/db_sequences.fasta \
-    --annot_file /app/data/goa_uniprot_filtered.gaf.gz \
+    --query_file /app/data/test_sequences.fasta \
+    --train_sequences /app/data/train_sequences.fasta \
+    --annot_file /app/data/train_terms.tsv \
     --graph /app/data/go-basic.obo \
-    --output_file /app/output/test_predictions.tsv.gz
-```
-
-**ProtT5 Testing Example**:
-```bash
-# ProtT5 requires GPU support
-docker run --rm \
-    -v /path/to/test_data:/app/data:ro \
-    -v /path/to/test_output:/app/output:rw \
-    prott5_predictor \
-    --query_file /app/data/query_sequences.fasta \
-    --train_sequences /app/data/db_sequences.fasta \
-    --annot_file /app/data/goa_uniprot_filtered.gaf.gz \
-    --graph /app/data/go-basic.obo \
-    --output_baseline /app/output/prott5_predictions.tsv.gz
+    --output_file /app/output/test_predictions.tsv.gz \
+    --num_threads 4
 ```
 
 **Docker Flags Explained**:
@@ -258,3 +251,13 @@ docker push yourusername/method_name:v1
 # docker tag prott5_predictor myusername/prott5_predictor:v1
 # docker push myusername/prott5_predictor:v1
 ```
+
+### Data storage on HuggingFace
+Required data for input are stored in a public repository on HuggingFace. To download this data and use, you can either install HuggingFace Command Line Interface (CLI) [here](https://huggingface.co/docs/huggingface_hub/en/guides/cli#download-a-dataset-or-a-space) or load the data directly into Python.
+
+
+To download the whole dataset using HuggingFace CLI, use:
+```bash
+hf download anphan0828/lafa --repo-type dataset --local-dir="your_local_dir" 
+```
+
