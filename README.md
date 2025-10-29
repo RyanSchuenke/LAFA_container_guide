@@ -261,7 +261,7 @@ To download the whole dataset using HuggingFace CLI, use:
 hf download anphan0828/lafa --repo-type dataset --local-dir="your_local_dir" 
 ```
 (updated Oct 2025) The public LAFA repository on HuggingFace contains:
-- AlphaFoldDB_v6 folder: PDB files of almost all SwissProt proteins (550,122 PDB files), version 6 (obtained from AlphaFoldDB FTP site). This folder contains 12 gzipped tar archives, each containing 50,000 PDB files. The list of proteins contained in each tar archive can be found in `tarball_proteins.json` file in the same directory.
+- AlphaFoldDB_v6 folder: PDB files of almost all SwissProt proteins (550,122 PDB files), version 6 (obtained from AlphaFoldDB FTP site). This folder contains 12 gzipped tar archives, each containing 50,000 PDB files. The list of proteins contained in each tar archive can be found in `tarball_proteins.json` file in the same directory. Example file name for protein `A0A009IHW8`: "AF-A0A009IHW8-F1-model_v6.pdb.gz"
 - JunOct folder: all data files collected from UniProt release 2025_03 (released in June 2025) needed for your protein function prediction method. This directory includes:
   1. GO structure: `go-basic-20250601.obo`
   2. Training sequences: `train_sequences.fasta` includes sequences of all experimentally-annotated proteins
