@@ -12,4 +12,5 @@ From: python:3.10
     pip install --no-cache-dir -r /app/requirements.txt
 
 %runscript
+    cd /app
     exec python3 goa_nonexp.py "$@"

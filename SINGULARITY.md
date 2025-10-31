@@ -36,7 +36,7 @@ sudo singularity build <container_image>.sif <container_name>.def
 
 There are probably more parallels in commands, I just didn't go into it fully. For a basic comparison, look at the `/nonexp_container` folder. Both the `Dockerfile` and `nonexp.def` files build an equivalently functioning container for docker and singularity respectively.
 
-To make sure that the singularity images behave like the docker images, files should be placed in the `app` directory
+To make sure that the singularity images behave like the docker images, files should be placed in the `app` directory.
 
 ## Running the container
 ```bash
@@ -49,7 +49,7 @@ navigate to the `nonexp_container` directory
 singularity build --fakeroot nonexp_image.sif nonexp.def
 
 # run
-singularity run --pwd /app -B ../test_data:/app/data nonexp_image.sif \
+singularity run -B ../test_data:/app/data nonexp_image.sif \
   --annot_file /app/data/goa_uniprot_selected.gaf \
   --selected_go Computational,Phylogenetical,Authorstatement,Curatorstatement,Electronic \
   --query_file /app/data/test_sequences.fasta \
