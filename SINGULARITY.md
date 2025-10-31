@@ -41,14 +41,16 @@ There are probably more parallels in commands, I just didn't go into it fully. F
 ## nonexp example
 navigate to the `nonexp_container` directory
 ```bash
+# build
 singularity build --fakeroot nonexp_image.sif nonexp.def
 
-singularity run -B ../test_data:/data nonexp_image.sif \
-  --annot_file /data/goa_uniprot_selected.gaf \
+# run
+singularity run -B ../test_data:/app/data nonexp_image.sif \
+  --annot_file /app/data/goa_uniprot_selected.gaf \
   --selected_go Computational,Phylogenetical,Authorstatement,Curatorstatement,Electronic \
-  --query_file /data/test_sequences.fasta \
-  --graph /data/go-basic-20250601.obo \
-  --output_baseline /data/train_terms.tsv
+  --query_file /app/data/test_sequences.fasta \
+  --graph /app/data/go-basic-20250601.obo \
+  --output_baseline /app/data/train_terms.tsv
 ```
 ## Docker --> Singularity container
 ### Docker images on dockerhub
